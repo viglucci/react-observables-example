@@ -27,14 +27,14 @@ export default class Dragable extends React.Component {
     );
   };
 
+  listenToMouseDown = (element) => {
+    return fromEvent(element, 'mousedown');
+  };
+
   listenToMouseMoveUntilMoseUp = (_) => {
     const documentMouseMoves = fromEvent(document, 'mousemove');
     const documentMouseUps = fromEvent(document, 'mouseup');
     return documentMouseMoves.pipe(takeUntil(documentMouseUps));
-  };
-
-  listenToMouseDown = (element) => {
-    return fromEvent(element, 'mousedown');
   };
 
   onMouseMoveEvent = (event) => {
