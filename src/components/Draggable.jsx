@@ -21,20 +21,45 @@ export default class Draggable extends React.Component {
   };
 
   getMouseMoveEvents = () => {
-    return this.subject.pipe(
-      switchMap(this.listenToMouseDown.bind(this)),
-      switchMap(this.listenToMouseMoveUntilMoseUp.bind(this))
+    /**
+     * Create a observable that when pushed a dom element
+     * binds a mousedown event handler to the element
+     * and emits any events from the handler.
+     */
+    const mouseDown = switchMap((element) => {
+      return fromEvent(element, 'mousedown');
+    });
+
+    /**
+     * Create a observable that emits mousemove events from a event
+     * listener on the document.
+     */
+    const mouseMoves = fromEvent(document, 'mousemove');
+
+    /**
+     * Create a observable that emits mouseup events from a event
+     * listener on the document.
+     */
+    const mouseUps = fromEvent(document, 'mouseup');
+
+    /**
+     * Create a observable that emits mouse move events UNTIL the 'mouseup'
+     * observable emits its first event.
+     */
+    const mouseMovesUntilMouseUp = switchMap(() => {
+      return mouseMoves.pipe(takeUntil(mouseUps));
+    });
+
+    /**
+     * Subject is pushed values (dom elements) from the invocation of `this.subject.next(element)` in
+     * the implementation of this.ref;
+     */
+    const mouseDrags = this.subject.pipe(
+      mouseDown,
+      mouseMovesUntilMouseUp
     );
-  };
 
-  listenToMouseDown = (element) => {
-    return fromEvent(element, 'mousedown');
-  };
-
-  listenToMouseMoveUntilMoseUp = () => {
-    const documentMouseMoves = fromEvent(document, 'mousemove');
-    const documentMouseUps = fromEvent(document, 'mouseup');
-    return documentMouseMoves.pipe(takeUntil(documentMouseUps));
+    return mouseDrags;
   };
 
   onMouseMoveEvent = (event) => {
@@ -45,9 +70,11 @@ export default class Draggable extends React.Component {
   };
 
   ref = (element) => {
-    if (element) {
-      this.subject.next(element);
-    }
+    if (!element) return;
+    /**
+     * Emit the new element everytime React gives us one.
+     */
+    this.subject.next(element);
   };
 
   render() {
