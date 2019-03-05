@@ -3,7 +3,7 @@ import React from 'react';
 import { fromEvent, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
 
-export default class Dragable extends React.Component {
+export default class Draggable extends React.Component {
   state = {
     x: this.props.x,
     y: this.props.y
@@ -31,7 +31,7 @@ export default class Dragable extends React.Component {
     return fromEvent(element, 'mousedown');
   };
 
-  listenToMouseMoveUntilMoseUp = (_) => {
+  listenToMouseMoveUntilMoseUp = () => {
     const documentMouseMoves = fromEvent(document, 'mousemove');
     const documentMouseUps = fromEvent(document, 'mouseup');
     return documentMouseMoves.pipe(takeUntil(documentMouseUps));
