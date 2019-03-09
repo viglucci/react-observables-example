@@ -1,7 +1,8 @@
-import styled from '@emotion/styled';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { fromEvent, Subject } from 'rxjs';
 import { switchMap, takeUntil } from 'rxjs/operators';
+import { getComponentDisplayName } from '../lib/util';
 
 export default class Draggable extends React.Component {
   state = {
@@ -69,8 +70,11 @@ export default class Draggable extends React.Component {
     });
   };
 
-  ref = (element) => {
-    if (!element) return;
+  setRef = (component) => {
+    if (!component) return;
+
+    const element = ReactDOM.findDOMNode(component);
+
     /**
      * Emit the new element everytime React gives us one.
      */
@@ -79,19 +83,35 @@ export default class Draggable extends React.Component {
 
   render() {
     const { x, y } = this.state;
-    const Container = styled.div`
-      width: 30px;
-      height: 30px;
-      background: red;
-      position: absolute;
-      cursor: -webkit-grab;
-    `;
 
-    const styles = {
+    const style = {
+      position: 'absolute',
       top: `${y}px`,
       left: `${x}px`
     };
 
-    return <Container ref={this.ref} style={styles} />;
+    return React.cloneElement(this.props.children, {
+      style,
+      ref: this.setRef.bind(this)
+    });
   }
 }
+
+export const withDraggable = (WrappedComponent) => {
+  class WithDraggable extends React.Component {
+    render() {
+      const props = this.props;
+      return (
+        <Draggable {...props}>
+          <WrappedComponent {...props} />
+        </Draggable>
+      );
+    }
+  }
+
+  const componentName = getComponentDisplayName(WrappedComponent);
+
+  WithDraggable.displayName = `WithDraggable(${componentName})`;
+
+  return WithDraggable;
+};

@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import './App.css';
-import Draggable from './components/Draggable.jsx';
+
+import Square from './components/Square.jsx';
+import Draggable, { withDraggable } from './components/Draggable.jsx';
+
+const DraggableSquare = withDraggable(Square);
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <Draggable x={100} y={200} />
-        <Draggable x={200} y={300} />
-        <Draggable x={300} y={400} />
+        <DraggableSquare x={100} y={100} />
+        <Draggable x={200} y={100}>
+          <Square />
+        </Draggable>
       </div>
     );
   }
