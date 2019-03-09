@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-import './App.css';
-
-import Square from './components/Square.jsx';
 import Draggable, { withDraggable } from './components/Draggable.jsx';
+import Square from './components/Square.jsx';
 
 const DraggableSquare = withDraggable(Square);
 
@@ -10,7 +8,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        {/* Render a precomposed square decorated with draggable capabilities */}
+        {/* Render a precomposed component decorated with draggable capabilities */}
         <DraggableSquare x={100} y={100} />
 
         {/* Wrap any child component in a Draggable to give it draggable capabilities */}
