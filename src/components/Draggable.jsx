@@ -6,15 +6,48 @@ import { getComponentDisplayName } from '../lib/util';
 
 export default class Draggable extends React.Component {
   state = {
+    isDragging: false,
     x: this.props.x,
     y: this.props.y
   };
 
   constructor(props) {
     super(props);
-    this.subject = new Subject();
+    this.dragSubject = new Subject();
+    this.mouseDownSubject = new Subject();
+    this.mouseUpSubject = new Subject();
     this.listenToDragEvents();
+    this.setStateOnMouseDown();
+    this.setStateOnMouseUp();
   }
+
+  setStateOnMouseDown = () => {
+    const events = this.mouseDownSubject.pipe(
+      switchMap((element) => {
+        return fromEvent(element, 'mousedown');
+      })
+    );
+
+    events.forEach((e) => {
+      this.setState({
+        isDragging: true
+      });
+    });
+  };
+
+  setStateOnMouseUp = () => {
+    const events = this.mouseUpSubject.pipe(
+      switchMap((element) => {
+        return fromEvent(element, 'mouseup');
+      })
+    );
+
+    events.forEach((e) => {
+      this.setState({
+        isDragging: false
+      });
+    });
+  };
 
   listenToDragEvents = () => {
     const mouseMoveEvents = this.getMouseMoveEvents();
@@ -55,7 +88,7 @@ export default class Draggable extends React.Component {
      * Subject is pushed values (dom elements) from the invocation of `this.subject.next(element)` in
      * the implementation of this.ref;
      */
-    const mouseDrags = this.subject.pipe(
+    const mouseDrags = this.dragSubject.pipe(
       mouseDown,
       mouseMovesUntilMouseUp
     );
@@ -75,20 +108,29 @@ export default class Draggable extends React.Component {
 
     const element = ReactDOM.findDOMNode(component);
 
-    /**
-     * Emit the new element everytime React gives us one.
-     */
-    this.subject.next(element);
+    this.dragSubject.next(element);
+    this.mouseDownSubject.next(element);
+    this.mouseUpSubject.next(element);
   };
 
   render() {
-    const { x, y } = this.state;
+    const { x, y, isDragging } = this.state;
 
     const style = {
       position: 'absolute',
       top: `${y}px`,
       left: `${x}px`
     };
+
+    if (typeof this.props.children === 'function') {
+      return this.props.children({
+        style,
+        ref: this.setRef.bind(this),
+        x,
+        y,
+        isDragging
+      });
+    }
 
     return React.cloneElement(this.props.children, {
       style,
