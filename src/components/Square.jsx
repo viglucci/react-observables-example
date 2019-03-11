@@ -5,15 +5,17 @@ const Div = styled.div`
   width: 30px;
   height: 30px;
   background-color: red;
+  border: solid 3px transparent;
 `;
 
 export default class Square extends React.Component {
   render() {
-    const { color, style } = this.props;
+    const { color, borderColor, style } = this.props;
     const mergedStyles = {
       ...style,
       ...{
-        backgroundColor: color
+        backgroundColor: color,
+        borderColor: borderColor
       }
     };
     return <Div {...this.props} style={mergedStyles} />;

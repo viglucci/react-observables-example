@@ -18,12 +18,19 @@ class App extends Component {
 
         {/* Use child as a function pattern to let the consumer decide what to do during state changes */}
         <Draggable x={300} y={100}>
-          {({ style, ref, isDragging }) => {
+          {(draggableState) => {
+            const {
+              style,
+              ref,
+              isDragging,
+              isDraggingStarting
+            } = draggableState;
             return (
               <Square
                 style={style}
                 ref={ref}
                 color={isDragging ? '#4286f4' : '#f44141'}
+                borderColor={isDraggingStarting ? '#4286f4' : '#f44141'}
               />
             );
           }}
